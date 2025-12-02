@@ -4,9 +4,8 @@ import path from 'node:path'
 
 // Vite config cho project React + GitHub Pages
 export default defineConfig({
-  // Quan trọng: trùng TÊN REPO trên GitHub
-  // Repo hiện tại: Nh-Xe-Thu-n-Th-c.io
-  base: '/Nh-Xe-Thu-n-Th-c.io/',
+  // Quan trọng: trùng TÊN REPO hiện tại trên GitHub: Mountain26/NhaXeThuanThuc
+  base: '/NhaXeThuanThuc/',
 
   plugins: [react()],
 
