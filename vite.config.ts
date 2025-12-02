@@ -5,8 +5,8 @@ import path from 'node:path'
 // Vite config cho project React + GitHub Pages
 export default defineConfig({
   // Quan trọng: trùng TÊN REPO trên GitHub
-  // Repo của ông: Mountain26.io
-  base: '/Mountain26.io/',
+  // Repo hiện tại: Nh-Xe-Thu-n-Th-c.io
+  base: '/Nh-Xe-Thu-n-Th-c.io/',
 
   plugins: [react()],
 
