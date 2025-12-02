@@ -17,55 +17,63 @@
 }
 
 .floating-contacts__item {
-  width: 3.25rem;
-  height: 3.25rem;
+  width: 3.65rem;
+  height: 3.65rem;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
   text-decoration: none;
-  box-shadow: 0 12px 28px rgba(26, 26, 26, 0.24);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  box-shadow: 0 16px 34px rgba(26, 26, 26, 0.22);
+  transition: transform 0.24s ease, box-shadow 0.24s ease, opacity 0.24s ease, filter 0.24s ease;
   opacity: 0.95;
-  animation: floating-contacts-wiggle 3.4s ease-in-out infinite;
-  will-change: transform;
+  animation: floating-contacts-float 4.2s ease-in-out infinite, floating-contacts-glow 5.8s ease-in-out infinite;
+  will-change: transform, box-shadow;
   position: relative;
   overflow: visible;
   background: var(--floating-bg);
+  background-size: 165% 165%;
+  background-position: 35% 35%;
 }
 
 .floating-contacts__item:hover {
   animation-play-state: paused;
-  transform: translateY(-3px) scale(1.03);
-  box-shadow: 0 18px 40px rgba(26, 26, 26, 0.28);
+  transform: translateY(-8px) scale(1.09) rotate(-2.5deg);
+  box-shadow: 0 24px 56px rgba(26, 26, 26, 0.33);
   opacity: 1;
+  filter: saturate(1.15);
 }
 
 .floating-contacts__item::before,
 .floating-contacts__item::after {
   content: "";
   position: absolute;
-  inset: -0.55rem;
+  inset: -0.85rem;
   border-radius: 999px;
   border: 2px solid var(--floating-ring, rgba(255, 255, 255, 0.35));
   opacity: 0;
-  transform: scale(0.6);
-  animation: floating-contacts-pulse 3.5s ease-out infinite;
+  transform: scale(0.62);
+  animation: floating-contacts-pulse 2.8s ease-out infinite;
   pointer-events: none;
   z-index: -1;
 }
 
 .floating-contacts__item::after {
-  animation-delay: 1.75s;
+  animation-delay: 1.4s;
 }
 
 .floating-contacts__item:nth-child(2) {
-  animation-delay: 0.25s;
+  animation-delay: 0.4s;
 }
 
 .floating-contacts__item:nth-child(3) {
-  animation-delay: 0.5s;
+  animation-delay: 0.8s;
+}
+
+.floating-contacts__item:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.45), 0 18px 40px rgba(26, 26, 26, 0.3);
 }
 
 .floating-contacts__icon {
@@ -74,13 +82,18 @@
   justify-content: center;
   font-size: 1.1rem;
   font-weight: 700;
-  width: 1.8rem;
-  height: 1.8rem;
+  width: 2.05rem;
+  height: 2.05rem;
+  transition: transform 0.3s ease;
 }
 
 .floating-contacts__icon svg {
-  width: 1.3rem;
-  height: 1.3rem;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.floating-contacts__item:hover .floating-contacts__icon {
+  transform: scale(1.2);
 }
 
 .floating-contacts__icon--zalo {
@@ -109,43 +122,122 @@
   --floating-ring: rgba(27, 79, 205, 0.45);
 }
 
-@keyframes floating-contacts-wiggle {
+.floating-contacts__halo {
+  position: absolute;
+  inset: -1.15rem;
+  border-radius: 999px;
+  background: radial-gradient(circle at center, var(--floating-ring, rgba(255, 255, 255, 0.35)) 0%, transparent 60%);
+  opacity: 0.38;
+  transform: scale(0.68);
+  filter: blur(0.38rem);
+  animation: floating-contacts-halo 3.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.floating-contacts__halo::before,
+.floating-contacts__halo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  opacity: 0;
+  transform: scale(0.75);
+  filter: blur(0.2rem);
+  animation: floating-contacts-ripple 4.4s ease-out infinite;
+}
+
+.floating-contacts__halo::after {
+  animation-delay: 2.2s;
+}
+
+@keyframes floating-contacts-float {
   0%,
-  70%,
   100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  10% {
-    transform: translateY(-2px) rotate(-6deg);
+    transform: translateY(0) scale(1) rotate(0deg);
   }
   20% {
-    transform: translateY(1px) rotate(4deg);
-  }
-  30% {
-    transform: translateY(-1px) rotate(-3deg);
+    transform: translateY(-5px) scale(1.025) rotate(-4deg);
   }
   40% {
-    transform: translateY(1px) rotate(2deg);
-  }
-  50% {
-    transform: translateY(-1px) rotate(-1deg);
+    transform: translateY(3px) scale(0.99) rotate(3deg);
   }
   60% {
-    transform: translateY(1px) rotate(1deg);
+    transform: translateY(-4px) scale(1.015) rotate(-2deg);
+  }
+  80% {
+    transform: translateY(2px) scale(1.008) rotate(2deg);
   }
 }
 
 @keyframes floating-contacts-pulse {
   0% {
-    opacity: 0.55;
-    transform: scale(0.7);
+    opacity: 0.75;
+    transform: scale(0.65);
   }
   60% {
     opacity: 0;
-    transform: scale(1.25);
+    transform: scale(1.45);
   }
   100% {
     opacity: 0;
     transform: scale(1.4);
+  }
+}
+
+@keyframes floating-contacts-glow {
+  0%,
+  100% {
+    box-shadow: 0 12px 28px rgba(26, 26, 26, 0.22);
+    background-position: 25% 25%;
+  }
+  50% {
+    box-shadow: 0 22px 48px rgba(26, 26, 26, 0.32);
+    background-position: 75% 75%;
+  }
+}
+
+@keyframes floating-contacts-halo {
+  0%,
+  100% {
+    opacity: 0.32;
+    transform: scale(0.65);
+    filter: blur(0.32rem);
+  }
+  40% {
+    opacity: 0.82;
+    transform: scale(1.12);
+    filter: blur(0.48rem);
+  }
+  70% {
+    opacity: 0.52;
+    transform: scale(0.82);
+    filter: blur(0.36rem);
+  }
+}
+
+@keyframes floating-contacts-ripple {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.7);
+  }
+  55% {
+    opacity: 0.16;
+    transform: scale(1.4);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.65);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-contacts__item,
+  .floating-contacts__item::before,
+  .floating-contacts__item::after,
+  .floating-contacts__halo {
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
   }
 }

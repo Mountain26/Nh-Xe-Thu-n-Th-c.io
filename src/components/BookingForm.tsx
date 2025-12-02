@@ -4,10 +4,10 @@ import {
   Search,
   PhoneCall,
   ArrowUpDown,
-  Image as ImageIcon,
-  ArrowRight,
+  ArrowDown,
   ChevronLeft,
   ChevronRight,
+  Bus,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -17,7 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
+import { useLanguage, Language } from "../context/LanguageContext";
 
 import seatPalaceImg from "./assets/ghexecungdien.jpg";
 import seatPalaceImg2 from "./assets/ghexecungdien2.jpg";
@@ -28,16 +29,21 @@ import seatStandardImg2 from "./assets/ghexethuong2.jpg";
 
 import "./BookingForm.css";
 
+type LocalizedText = Record<Language, string>;
+
+type SeatLabel = "Ghế đơn" | "Ghế ghép" | "Ghế đôi";
+type VehicleType = "Xe thường" | "Xe khách sạn" | "Xe cung điện";
+
 type SeatOption = {
-  label: string;
-  price: string;
+  label: SeatLabel;
+  price: LocalizedText;
 };
 
 type RouteOption = {
-  vehicleType: string;
+  vehicleType: VehicleType;
   times: string[];
-  price: string;
-  notes?: string;
+  price: LocalizedText;
+  notes?: LocalizedText;
   seatOptions?: SeatOption[];
 };
 
@@ -50,26 +56,119 @@ type RouteInfo = {
   distance?: string;
 };
 
-const serviceLocations = [
-  { value: "ha-giang", label: "Hà Giang" },
-  { value: "lang-son", label: "Lạng Sơn" },
-  { value: "bac-ninh", label: "Bắc Ninh" },
-  { value: "bac-giang", label: "Bắc Giang" },
-  { value: "mong-cai", label: "Móng Cái" },
-  { value: "quang-ninh", label: "Quảng Ninh" },
-  { value: "tay-nguyen", label: "Tây Nguyên" },
-  { value: "chi-linh", label: "Chí Linh" },
+type ServiceLocation = {
+  value: string;
+  label: Record<Language, string>;
+};
+
+const serviceLocations: ServiceLocation[] = [
+  { value: "ha-giang", label: { vi: "Hà Giang", en: "Ha Giang" } },
+  { value: "lang-son", label: { vi: "Lạng Sơn", en: "Lang Son" } },
+  { value: "bac-ninh", label: { vi: "Bắc Ninh", en: "Bac Ninh" } },
+  { value: "bac-giang", label: { vi: "Bắc Giang", en: "Bac Giang" } },
+  { value: "mong-cai", label: { vi: "Móng Cái", en: "Mong Cai" } },
+  { value: "quang-ninh", label: { vi: "Quảng Ninh", en: "Quang Ninh" } },
+  { value: "tay-nguyen", label: { vi: "Tây Nguyên", en: "Central Highlands" } },
+  { value: "chi-linh", label: { vi: "Chí Linh", en: "Chi Linh" } },
 ];
 
-const locationLabelLookup = serviceLocations.reduce<Record<string, string>>((acc, location) => {
-  acc[location.value] = location.label;
-  return acc;
-}, {});
+const locationLabelLookup: Record<Language, Record<string, string>> = serviceLocations.reduce(
+  (acc, location) => {
+    acc.vi[location.value] = location.label.vi;
+    acc.en[location.value] = location.label.en;
+    return acc;
+  },
+  { vi: {}, en: {} } as Record<Language, Record<string, string>>,
+);
 
-const vehicleImages: Record<string, string[]> = {
-  "xe thường": [seatStandardImg, seatStandardImg2],
-  "xe khách sạn": [seatHotelImg, seatHotelImg2],
-  "xe cung điện": [seatPalaceImg, seatPalaceImg2],
+const vehicleImages: Record<VehicleType, string[]> = {
+  "Xe thường": [seatStandardImg, seatStandardImg2],
+  "Xe khách sạn": [seatHotelImg, seatHotelImg2],
+  "Xe cung điện": [seatPalaceImg, seatPalaceImg2],
+};
+
+const formCopy = {
+  vi: {
+    formTitle: "Đặt vé trực tuyến",
+    formDescription: "Nhập thông tin hành trình để xem chuyến phù hợp",
+    originLabel: "Điểm khởi hành",
+    originPlaceholder: "Chọn điểm khởi hành",
+    destinationLabel: "Điểm đến",
+    destinationPlaceholder: "Chọn điểm đến",
+    searchButton: "Tìm chuyến",
+    swapAria: "Đổi chiều hành trình",
+    durationLabel: "Thời gian:",
+    durationFallback: "Đang cập nhật",
+    distanceLabel: "Khoảng cách:",
+    distanceFallback: "Đang cập nhật",
+    departuresLabel: "Giờ xuất bến:",
+    seatHeading: "Loại ghế",
+    seatChipHeading: "Tùy chọn ghế",
+    suiteHeading: "Loại phòng",
+    callToBook: "Đặt vé ngay",
+    callSupport: "Gọi tư vấn",
+    prevImage: "Ảnh trước",
+    nextImage: "Ảnh tiếp",
+    imageAltPrefix: "Hình ảnh",
+    emptyMessage:
+      "Hiện chưa có lịch trình cho tuyến này. Vui lòng chọn tuyến khác hoặc liên hệ tổng đài.",
+  },
+  en: {
+    formTitle: "Book tickets online",
+    formDescription: "Enter your trip details to view matching departures",
+    originLabel: "Departure point",
+    originPlaceholder: "Choose departure",
+    destinationLabel: "Destination",
+    destinationPlaceholder: "Choose destination",
+    searchButton: "Search trips",
+    swapAria: "Swap route direction",
+    durationLabel: "Duration:",
+    durationFallback: "Updating",
+    distanceLabel: "Distance:",
+    distanceFallback: "Updating",
+    departuresLabel: "Departure times:",
+    seatHeading: "Seat types",
+    seatChipHeading: "Seat options",
+    suiteHeading: "Suite types",
+    callToBook: "Book now",
+    callSupport: "Call support",
+    prevImage: "Previous photo",
+    nextImage: "Next photo",
+    imageAltPrefix: "Vehicle photo",
+    emptyMessage:
+      "No schedules are available for this route. Please choose another route or contact our hotline.",
+  },
+} as const;
+
+const vehicleTypeCopy: Record<VehicleType, Record<Language, string>> = {
+  "Xe thường": { vi: "Xe giường nằm 44 giường", en: "44-berth sleeper coach" },
+  "Xe khách sạn": { vi: "Xe giường nằm 34 giường VIP", en: "34-berth VIP sleeper" },
+  "Xe cung điện": { vi: "Limousine 24 phòng VIP", en: "24-suite VIP limousine" },
+};
+
+const seatLabelCopy = {
+  "Ghế đơn": { vi: "Ghế đơn", en: "Single seat" },
+  "Ghế ghép": { vi: "Ghế ghép", en: "Shared seat" },
+  "Ghế đôi": { vi: "Ghế đôi", en: "Double seat" },
+} as const;
+
+const premiumSeatLabelCopy = {
+  "Ghế đơn": { vi: "Phòng đơn", en: "Single suite" },
+  "Ghế ghép": { vi: "Phòng ghép", en: "Shared suite" },
+  "Ghế đôi": { vi: "Phòng đôi", en: "Double suite" },
+} as const;
+
+const durationCopy: Record<string, string> = {
+  "6 giờ 15 phút": "6h 15m",
+  "6 giờ": "6h",
+  "6 giờ 30 phút": "6h 30m",
+  "9 giờ 30 phút": "9h 30m",
+  "9 giờ": "9h",
+  "8 giờ 10 phút": "8h 10m",
+  "8 giờ": "8h",
+  "10 giờ": "10h",
+  "7 giờ": "7h",
+  "6 giờ 45 phút": "6h 45m",
 };
 
 const routes: RouteInfo[] = [
@@ -82,7 +181,7 @@ const routes: RouteInfo[] = [
       {
         vehicleType: "Xe thường",
         times: ["07h30", "18h30"],
-        price: "350.000đ",
+        price: { vi: "350.000đ", en: "350,000 VND" },
       },
     ],
   },
@@ -95,7 +194,7 @@ const routes: RouteInfo[] = [
       {
         vehicleType: "Xe thường",
         times: ["06h30", "17h30"],
-        price: "350.000đ",
+        price: { vi: "350.000đ", en: "350,000 VND" },
       },
     ],
   },
@@ -108,20 +207,21 @@ const routes: RouteInfo[] = [
       {
         vehicleType: "Xe thường",
         times: ["07h30", "18h30"],
-        price: "250.000đ",
+        price: { vi: "250.000đ", en: "250,000 VND" },
       },
       {
         vehicleType: "Xe khách sạn",
-        times: ["11h00", "18h00"],
-        price: "250.000đ",
+        times: ["11h00"],
+        price: { vi: "250.000đ", en: "250,000 VND" },
       },
       {
         vehicleType: "Xe cung điện",
         times: ["20h00"],
-        price: "Ghế đơn 350.000đ",
+        price: { vi: "Ghế đơn 350.000đ", en: "Single suite 350,000 VND" },
         seatOptions: [
-          { label: "Ghế đơn", price: "350.000đ" },
-          { label: "Ghế ghép", price: "250.000đ" },
+          { label: "Ghế đơn", price: { vi: "350.000đ", en: "350,000 VND" } },
+          { label: "Ghế ghép", price: { vi: "250.000đ", en: "250,000 VND" } },
+          { label: "Ghế đôi", price: { vi: "550.000đ", en: "550,000 VND" } },
         ],
       },
     ],
@@ -135,20 +235,20 @@ const routes: RouteInfo[] = [
       {
         vehicleType: "Xe thường",
         times: ["09h00"],
-        price: "250.000đ",
+        price: { vi: "250.000đ", en: "250,000 VND" },
       },
       {
         vehicleType: "Xe khách sạn",
         times: ["11h00", "20h30"],
-        price: "250.000đ",
+        price: { vi: "250.000đ", en: "250,000 VND" },
       },
       {
         vehicleType: "Xe cung điện",
         times: ["21h30"],
-        price: "Ghế đơn 350.000đ",
+        price: { vi: "Ghế đơn 350.000đ", en: "Single suite 350,000 VND" },
         seatOptions: [
-          { label: "Ghế đơn", price: "350.000đ" },
-          { label: "Ghế ghép", price: "250.000đ" },
+          { label: "Ghế đơn", price: { vi: "350.000đ", en: "350,000 VND" } },
+          { label: "Ghế ghép", price: { vi: "250.000đ", en: "250,000 VND" } },
         ],
       },
     ],
@@ -162,8 +262,8 @@ const routes: RouteInfo[] = [
       {
         vehicleType: "Xe cung điện",
         times: ["20h00"],
-        price: "Ghế ghép 450.000đ",
-        seatOptions: [{ label: "Ghế ghép", price: "450.000đ" }],
+        price: { vi: "Ghế ghép 450.000đ", en: "Shared suite 450,000 VND" },
+        seatOptions: [{ label: "Ghế ghép", price: { vi: "450.000đ", en: "450,000 VND" } }],
       },
     ],
   },
@@ -176,10 +276,10 @@ const routes: RouteInfo[] = [
       {
         vehicleType: "Xe cung điện",
         times: ["14h30"],
-        price: "Ghế đơn 600.000đ",
+        price: { vi: "Ghế đơn 600.000đ", en: "Single suite 600,000 VND" },
         seatOptions: [
-          { label: "Ghế đơn", price: "600.000đ" },
-          { label: "Ghế đôi", price: "900.000đ" },
+          { label: "Ghế đơn", price: { vi: "600.000đ", en: "600,000 VND" } },
+          { label: "Ghế đôi", price: { vi: "900.000đ", en: "900,000 VND" } },
         ],
       },
     ],
@@ -193,16 +293,16 @@ const routes: RouteInfo[] = [
       {
         vehicleType: "Xe khách sạn",
         times: ["11h00", "18h00"],
-        price: "350.000đ",
+        price: { vi: "350.000đ", en: "350,000 VND" },
       },
       {
         vehicleType: "Xe cung điện",
         times: ["20h00"],
-        price: "Ghế đơn 550.000đ",
+        price: { vi: "Ghế đơn 550.000đ", en: "Single suite 550,000 VND" },
         seatOptions: [
-          { label: "Ghế đơn", price: "550.000đ" },
-          { label: "Ghế đôi", price: "750.000đ" },
-          { label: "Ghế ghép", price: "350.000đ" },
+          { label: "Ghế đơn", price: { vi: "550.000đ", en: "550,000 VND" } },
+          { label: "Ghế đôi", price: { vi: "750.000đ", en: "750,000 VND" } },
+          { label: "Ghế ghép", price: { vi: "350.000đ", en: "350,000 VND" } },
         ],
       },
     ],
@@ -216,16 +316,16 @@ const routes: RouteInfo[] = [
       {
         vehicleType: "Xe khách sạn",
         times: ["07h00", "16h20"],
-        price: "350.000đ",
+        price: { vi: "350.000đ", en: "350,000 VND" },
       },
       {
         vehicleType: "Xe cung điện",
         times: ["17h30"],
-        price: "Ghế đơn 550.000đ",
+        price: { vi: "Ghế đơn 550.000đ", en: "Single suite 550,000 VND" },
         seatOptions: [
-          { label: "Ghế đơn", price: "550.000đ" },
-          { label: "Ghế đôi", price: "750.000đ" },
-          { label: "Ghế ghép", price: "350.000đ" },
+          { label: "Ghế đơn", price: { vi: "550.000đ", en: "550,000 VND" } },
+          { label: "Ghế đôi", price: { vi: "750.000đ", en: "750,000 VND" } },
+          { label: "Ghế ghép", price: { vi: "350.000đ", en: "350,000 VND" } },
         ],
       },
     ],
@@ -239,21 +339,21 @@ const routes: RouteInfo[] = [
       {
         vehicleType: "Xe thường",
         times: ["07h30", "18h30"],
-        price: "200.000đ",
+        price: { vi: "200.000đ", en: "200,000 VND" },
       },
       {
         vehicleType: "Xe khách sạn",
         times: ["18h00"],
-        price: "250.000đ",
+        price: { vi: "250.000đ", en: "250,000 VND" },
       },
       {
         vehicleType: "Xe cung điện",
         times: ["20h00"],
-        price: "Ghế đơn 350.000đ",
+        price: { vi: "Ghế đơn 350.000đ", en: "Single suite 350,000 VND" },
         seatOptions: [
-          { label: "Ghế đơn", price: "350.000đ" },
-          { label: "Ghế đôi", price: "550.000đ" },
-          { label: "Ghế ghép", price: "250.000đ" },
+          { label: "Ghế đơn", price: { vi: "350.000đ", en: "350,000 VND" } },
+          { label: "Ghế đôi", price: { vi: "550.000đ", en: "550,000 VND" } },
+          { label: "Ghế ghép", price: { vi: "250.000đ", en: "250,000 VND" } },
         ],
       },
     ],
@@ -267,21 +367,21 @@ const routes: RouteInfo[] = [
       {
         vehicleType: "Xe thường",
         times: ["10h00"],
-        price: "200.000đ",
+        price: { vi: "200.000đ", en: "200,000 VND" },
       },
       {
         vehicleType: "Xe khách sạn",
         times: ["21h30"],
-        price: "250.000đ",
+        price: { vi: "250.000đ", en: "250,000 VND" },
       },
       {
         vehicleType: "Xe cung điện",
         times: ["22h15"],
-        price: "Ghế đơn 350.000đ",
+        price: { vi: "Ghế đơn 350.000đ", en: "Single suite 350,000 VND" },
         seatOptions: [
-          { label: "Ghế đơn", price: "350.000đ" },
-          { label: "Ghế đôi", price: "550.000đ" },
-          { label: "Ghế ghép", price: "250.000đ" },
+          { label: "Ghế đơn", price: { vi: "350.000đ", en: "350,000 VND" } },
+          { label: "Ghế đôi", price: { vi: "550.000đ", en: "550,000 VND" } },
+          { label: "Ghế ghép", price: { vi: "250.000đ", en: "250,000 VND" } },
         ],
       },
     ],
@@ -295,16 +395,16 @@ const routes: RouteInfo[] = [
       {
         vehicleType: "Xe khách sạn",
         times: ["11h00", "18h00"],
-        price: "300.000đ",
+        price: { vi: "300.000đ", en: "300,000 VND" },
       },
       {
         vehicleType: "Xe cung điện",
         times: ["20h00"],
-        price: "Ghế đơn 400.000đ",
+        price: { vi: "Ghế đơn 400.000đ", en: "Single suite 400,000 VND" },
         seatOptions: [
-          { label: "Ghế đơn", price: "400.000đ" },
-          { label: "Ghế đôi", price: "700.000đ" },
-          { label: "Ghế ghép", price: "300.000đ" },
+          { label: "Ghế đơn", price: { vi: "400.000đ", en: "400,000 VND" } },
+          { label: "Ghế đôi", price: { vi: "700.000đ", en: "700,000 VND" } },
+          { label: "Ghế ghép", price: { vi: "300.000đ", en: "300,000 VND" } },
         ],
       },
     ],
@@ -318,16 +418,16 @@ const routes: RouteInfo[] = [
       {
         vehicleType: "Xe khách sạn",
         times: ["10h30", "19h30"],
-        price: "300.000đ",
+        price: { vi: "300.000đ", en: "300,000 VND" },
       },
       {
         vehicleType: "Xe cung điện",
         times: ["20h30"],
-        price: "Ghế đơn 400.000đ",
+        price: { vi: "Ghế đơn 400.000đ", en: "Single suite 400,000 VND" },
         seatOptions: [
-          { label: "Ghế đơn", price: "400.000đ" },
-          { label: "Ghế đôi", price: "700.000đ" },
-          { label: "Ghế ghép", price: "300.000đ" },
+          { label: "Ghế đơn", price: { vi: "400.000đ", en: "400,000 VND" } },
+          { label: "Ghế đôi", price: { vi: "700.000đ", en: "700,000 VND" } },
+          { label: "Ghế ghép", price: { vi: "300.000đ", en: "300,000 VND" } },
         ],
       },
     ],
@@ -341,21 +441,21 @@ const routes: RouteInfo[] = [
       {
         vehicleType: "Xe thường",
         times: ["07h30", "18h30"],
-        price: "250.000đ",
+        price: { vi: "250.000đ", en: "250,000 VND" },
       },
       {
         vehicleType: "Xe khách sạn",
         times: ["11h00"],
-        price: "250.000đ",
+        price: { vi: "250.000đ", en: "250,000 VND" },
       },
       {
         vehicleType: "Xe cung điện",
         times: ["20h00"],
-        price: "Ghế đơn 350.000đ",
+        price: { vi: "Ghế đơn 350.000đ", en: "Single suite 350,000 VND" },
         seatOptions: [
-          { label: "Ghế đơn", price: "350.000đ" },
-          { label: "Ghế đôi", price: "600.000đ" },
-          { label: "Ghế ghép", price: "250.000đ" },
+          { label: "Ghế đơn", price: { vi: "350.000đ", en: "350,000 VND" } },
+          { label: "Ghế đôi", price: { vi: "600.000đ", en: "600,000 VND" } },
+          { label: "Ghế ghép", price: { vi: "250.000đ", en: "250,000 VND" } },
         ],
       },
     ],
@@ -369,21 +469,21 @@ const routes: RouteInfo[] = [
       {
         vehicleType: "Xe thường",
         times: ["08h00", "20h00"],
-        price: "250.000đ",
+        price: { vi: "250.000đ", en: "250,000 VND" },
       },
       {
         vehicleType: "Xe khách sạn",
         times: ["11h00"],
-        price: "250.000đ",
+        price: { vi: "250.000đ", en: "250,000 VND" },
       },
       {
         vehicleType: "Xe cung điện",
         times: ["21h30"],
-        price: "Ghế đơn 350.000đ",
+        price: { vi: "Ghế đơn 350.000đ", en: "Single suite 350,000 VND" },
         seatOptions: [
-          { label: "Ghế đơn", price: "350.000đ" },
-          { label: "Ghế đôi", price: "600.000đ" },
-          { label: "Ghế ghép", price: "250.000đ" },
+          { label: "Ghế đơn", price: { vi: "350.000đ", en: "350,000 VND" } },
+          { label: "Ghế đôi", price: { vi: "600.000đ", en: "600,000 VND" } },
+          { label: "Ghế ghép", price: { vi: "250.000đ", en: "250,000 VND" } },
         ],
       },
     ],
@@ -391,17 +491,71 @@ const routes: RouteInfo[] = [
 ];
 
 export function BookingForm() {
+  const { language } = useLanguage();
+  const labels = formCopy[language];
   const [origin, setOrigin] = React.useState<string>("ha-giang");
   const [destination, setDestination] = React.useState<string>("mong-cai");
   const [hasSearched, setHasSearched] = React.useState(false);
-  const [expandedRouteKey, setExpandedRouteKey] = React.useState<string | null>(null);
   const [imageIndexByRoute, setImageIndexByRoute] = React.useState<Record<string, number>>({});
+  const [selectedPremiumSuiteByRoute, setSelectedPremiumSuiteByRoute] = React.useState<
+    Partial<Record<string, SeatLabel>>
+  >({});
 
   const matchingRoutes = React.useMemo(() => {
     return routes.filter(
       (route) => route.origin === origin && route.destination === destination,
     );
   }, [origin, destination]);
+
+  const galleryKeyData = React.useMemo(() => {
+    if (!hasSearched) {
+      return [] as Array<{ key: string; total: number }>;
+    }
+
+    const entries: Array<{ key: string; total: number }> = [];
+
+    matchingRoutes.forEach((route) => {
+      route.options.forEach((option, index) => {
+        const images = vehicleImages[option.vehicleType] ?? [];
+        if (images.length > 1) {
+          entries.push({
+            key: `${route.origin}-${route.destination}-${option.vehicleType}-${index}`,
+            total: images.length,
+          });
+        }
+      });
+    });
+
+    return entries;
+  }, [matchingRoutes, hasSearched]);
+
+  React.useEffect(() => {
+    if (galleryKeyData.length === 0) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setImageIndexByRoute((prev) => {
+        const nextIndexes: Record<string, number> = { ...prev };
+        let changed = false;
+
+        galleryKeyData.forEach(({ key, total }) => {
+          const current = prev[key] ?? 0;
+          const nextValue = (current + 1) % total;
+          if (nextValue !== current) {
+            nextIndexes[key] = nextValue;
+            changed = true;
+          }
+        });
+
+        return changed ? nextIndexes : prev;
+      });
+    }, 3000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [galleryKeyData]);
 
   const handleSearch = () => {
     setHasSearched(true);
@@ -410,33 +564,23 @@ export function BookingForm() {
   const handleOriginChange = (value: string) => {
     setOrigin(value);
     setHasSearched(false);
-    setExpandedRouteKey(null);
     setImageIndexByRoute({});
+    setSelectedPremiumSuiteByRoute({});
   };
 
   const handleDestinationChange = (value: string) => {
     setDestination(value);
     setHasSearched(false);
-    setExpandedRouteKey(null);
     setImageIndexByRoute({});
+    setSelectedPremiumSuiteByRoute({});
   };
 
   const handleSwap = () => {
     setOrigin(destination);
     setDestination(origin);
     setHasSearched(false);
-    setExpandedRouteKey(null);
     setImageIndexByRoute({});
-  };
-
-  const toggleRouteImage = (key: string) => {
-    setExpandedRouteKey((current) => {
-      const nextKey = current === key ? null : key;
-      if (nextKey !== null && nextKey !== current) {
-        setImageIndexByRoute((prev) => ({ ...prev, [key]: 0 }));
-      }
-      return nextKey;
-    });
+    setSelectedPremiumSuiteByRoute({});
   };
 
   const handleNextImage = (key: string, total: number) => {
@@ -459,6 +603,13 @@ export function BookingForm() {
     });
   };
 
+  const handlePremiumSuiteChange = React.useCallback(
+    (key: string, value: string) => {
+      setSelectedPremiumSuiteByRoute((prev) => ({ ...prev, [key]: value as SeatLabel }));
+    },
+    [],
+  );
+
   return (
     <section className="booking-form-section" id="tim-chuyen">
       <div className="booking-form-container">
@@ -471,8 +622,8 @@ export function BookingForm() {
         >
           {/* Form title */}
           <div className="booking-form-header">
-            <h3 className="booking-form-title">Đặt vé trực tuyến</h3>
-            <p className="booking-form-description">Nhập thông tin hành trình để xem chuyến phù hợp</p>
+            <h3 className="booking-form-title">{labels.formTitle}</h3>
+            <p className="booking-form-description">{labels.formDescription}</p>
           </div>
 
           {/* Booking form grid */}
@@ -480,19 +631,19 @@ export function BookingForm() {
             <div className="booking-route-pair">
               {/* Origin input */}
               <div className="booking-field">
-                <label className="booking-label">Điểm khởi hành</label>
+                <label className="booking-label">{labels.originLabel}</label>
                 <div className="booking-input-wrapper">
                   <span className="booking-icon">
                     <MapPin />
                   </span>
                   <Select value={origin} onValueChange={handleOriginChange}>
                     <SelectTrigger className="booking-select-trigger">
-                      <SelectValue placeholder="Chọn điểm khởi hành" className="booking-select-value" />
+                      <SelectValue placeholder={labels.originPlaceholder} className="booking-select-value" />
                     </SelectTrigger>
                     <SelectContent className="booking-select-content">
                       {serviceLocations.map((location) => (
                         <SelectItem key={location.value} value={location.value}>
-                          {location.label}
+                          {location.label[language]}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -505,26 +656,26 @@ export function BookingForm() {
                 variant="outline"
                 className="booking-swap-button"
                 onClick={handleSwap}
-                aria-label="Đổi chiều hành trình"
+                aria-label={labels.swapAria}
               >
                 <ArrowUpDown />
               </Button>
 
               {/* Destination input */}
               <div className="booking-field">
-                <label className="booking-label">Điểm đến</label>
+                <label className="booking-label">{labels.destinationLabel}</label>
                 <div className="booking-input-wrapper">
                   <span className="booking-icon">
                     <MapPin />
                   </span>
                   <Select value={destination} onValueChange={handleDestinationChange}>
                     <SelectTrigger className="booking-select-trigger">
-                      <SelectValue placeholder="Chọn điểm đến" className="booking-select-value" />
+                      <SelectValue placeholder={labels.destinationPlaceholder} className="booking-select-value" />
                     </SelectTrigger>
                     <SelectContent className="booking-select-content">
                       {serviceLocations.map((location) => (
                         <SelectItem key={location.value} value={location.value}>
-                          {location.label}
+                          {location.label[language]}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -536,9 +687,9 @@ export function BookingForm() {
             {/* Search button */}
             <div className="booking-field booking-search-field">
               <label className="booking-label booking-helper-label">&nbsp;</label>
-              <Button type="button" className="booking-search-button" onClick={handleSearch}>
+              <Button type="button" className="booking-search-button" onClick={handleSearch} aria-label={labels.searchButton}>
                 <Search />
-                Tìm chuyến
+                {labels.searchButton}
               </Button>
             </div>
           </div>
@@ -553,23 +704,74 @@ export function BookingForm() {
             >
               {matchingRoutes.length > 0 ? (
                 matchingRoutes.flatMap((route) => {
-                  const originLabel = locationLabelLookup[route.origin] ?? route.origin;
-                  const destinationLabel = locationLabelLookup[route.destination] ?? route.destination;
+                  const originLabel = locationLabelLookup[language][route.origin] ?? route.origin;
+                  const destinationLabel = locationLabelLookup[language][route.destination] ?? route.destination;
 
                   return route.options.map((option, index) => {
-                    const vehicleKey = option.vehicleType.toLowerCase();
-                    const isPremium = vehicleKey.includes("cung điện");
-                    const imageSet = vehicleImages[vehicleKey] ?? [];
+                    const isPremium = option.vehicleType === "Xe cung điện";
+                    const vehicleDisplayName = vehicleTypeCopy[option.vehicleType]?.[language] ?? option.vehicleType;
+                    const imageSet = vehicleImages[option.vehicleType] ?? [];
                     const hasImages = imageSet.length > 0;
                     const cardKey = `${route.origin}-${route.destination}-${option.vehicleType}-${index}`;
-                    const isExpanded = expandedRouteKey === cardKey;
                     const activeImageIndex = imageIndexByRoute[cardKey] ?? 0;
                     const effectiveIndex = hasImages
                       ? Math.min(Math.max(activeImageIndex, 0), imageSet.length - 1)
                       : 0;
                     const currentImage = hasImages ? imageSet[effectiveIndex] : undefined;
-                    const primarySeat = option.seatOptions?.find((seat) => seat.label === "Ghế đơn") ?? option.seatOptions?.[0];
-                    const displayPrice = isPremium ? null : option.price;
+                    const seatOptions = option.seatOptions ?? [];
+                    const durationValue = route.duration
+                      ? language === "vi"
+                        ? route.duration
+                        : durationCopy[route.duration] ?? route.duration
+                      : labels.durationFallback;
+                    const distanceValue = route.distance ?? labels.distanceFallback;
+                    const imageAltText = `${labels.imageAltPrefix} ${vehicleDisplayName}`;
+                    const fareContent = !isPremium ? (
+                      <span className="booking-route-fare-price">{option.price[language]}</span>
+                    ) : null;
+                    const premiumSuites = isPremium && seatOptions.length > 0 ? (
+                      (() => {
+                        const savedSuite = selectedPremiumSuiteByRoute[cardKey];
+                        const defaultSuite = seatOptions[0]?.label ?? null;
+                        const activeSuiteLabel =
+                          savedSuite && seatOptions.some((seat) => seat.label === savedSuite)
+                            ? savedSuite
+                            : defaultSuite;
+                        const normalizedSuiteValue = activeSuiteLabel ?? seatOptions[0]?.label ?? undefined;
+                        const activeSuite = seatOptions.find((seat) => seat.label === normalizedSuiteValue);
+
+                        return (
+                          <div className="booking-route-suite-selector">
+                            <label className="booking-route-suite-heading" htmlFor={`${cardKey}-suite`}>
+                              {labels.suiteHeading}
+                            </label>
+                            <div className="booking-route-suite-control">
+                              <Select
+                                value={normalizedSuiteValue}
+                                onValueChange={(value) => handlePremiumSuiteChange(cardKey, value)}
+                              >
+                                <SelectTrigger id={`${cardKey}-suite`} className="booking-route-suite-trigger">
+                                  <SelectValue className="booking-route-suite-value" />
+                                </SelectTrigger>
+                                <SelectContent className="booking-route-suite-content">
+                                  {seatOptions.map((seat) => {
+                                    const seatLabel = premiumSeatLabelCopy[seat.label]?.[language] ?? seat.label;
+                                    return (
+                                      <SelectItem key={`${option.vehicleType}-${seat.label}`} value={seat.label}>
+                                        {seatLabel}
+                                      </SelectItem>
+                                    );
+                                  })}
+                                </SelectContent>
+                              </Select>
+                              {activeSuite ? (
+                                <span className="booking-route-suite-price">{activeSuite.price[language]}</span>
+                              ) : null}
+                            </div>
+                          </div>
+                        );
+                      })()
+                    ) : null;
 
                     return (
                       <motion.div
@@ -579,34 +781,90 @@ export function BookingForm() {
                         whileHover={{ translateY: -6 }}
                         transition={{ type: "spring", stiffness: 180, damping: 18 }}
                       >
+                        <div className="booking-route-media">
+                          {hasImages && currentImage ? (
+                            <AnimatePresence mode="wait" initial={false}>
+                              <motion.img
+                                key={currentImage}
+                                src={currentImage}
+                                alt={imageAltText}
+                                loading="lazy"
+                                className="booking-route-media-image"
+                                initial={{ opacity: 0, scale: 1.02 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.98 }}
+                                transition={{ duration: 0.45, ease: "easeOut" }}
+                                style={{ position: "absolute", inset: 0 }}
+                              />
+                            </AnimatePresence>
+                          ) : (
+                            <div className="booking-route-media-fallback">{vehicleDisplayName}</div>
+                          )}
+                          {hasImages && imageSet.length > 1 ? (
+                            <>
+                              <button
+                                type="button"
+                                className="booking-route-media-arrow booking-route-media-arrow--prev"
+                                onClick={() => handlePrevImage(cardKey, imageSet.length)}
+                                aria-label={labels.prevImage}
+                              >
+                                <ChevronLeft />
+                              </button>
+                              <button
+                                type="button"
+                                className="booking-route-media-arrow booking-route-media-arrow--next"
+                                onClick={() => handleNextImage(cardKey, imageSet.length)}
+                                aria-label={labels.nextImage}
+                              >
+                                <ChevronRight />
+                              </button>
+                            </>
+                          ) : null}
+                        </div>
+
                         <div className="booking-route-card-body">
                           <div className="booking-route-headline">
                             <div className="booking-route-service">
-                              <span className="booking-route-service-name">{option.vehicleType}</span>
+                              <span className="booking-route-service-icon">
+                                <Bus />
+                              </span>
+                              <div className="booking-route-service-copy">
+                                <span className="booking-route-service-name">{vehicleDisplayName}</span>
+                              </div>
                             </div>
-                            {!isPremium && <div className="booking-route-price">{displayPrice}</div>}
                           </div>
 
-                          <div className="booking-route-path">
-                            <span className="booking-route-location">{originLabel}</span>
-                            <ArrowRight className="booking-route-path-icon" aria-hidden="true" />
-                            <span className="booking-route-location booking-route-location--destination">{destinationLabel}</span>
+                          <div className="booking-route-overview">
+                            <div className="booking-route-stops">
+                              <div className="booking-route-stop booking-route-stop--origin">
+                                <span className="booking-route-dot booking-route-dot--origin" />
+                                <span className="booking-route-stop-name">{originLabel}</span>
+                              </div>
+                              <div className="booking-route-connector">
+                                <ArrowDown aria-hidden="true" />
+                              </div>
+                              <div className="booking-route-stop booking-route-stop--destination">
+                                <span className="booking-route-dot booking-route-dot--destination" />
+                                <span className="booking-route-stop-name">{destinationLabel}</span>
+                              </div>
+                            </div>
+                            {!isPremium ? <div className="booking-route-fare">{fareContent}</div> : null}
                           </div>
 
                           <div className="booking-route-meta">
                             <div className="booking-route-meta-item">
-                              <span className="booking-route-meta-label">Thời gian:</span>
-                              <span className="booking-route-meta-value">{route.duration ?? "Đang cập nhật"}</span>
+                              <span className="booking-route-meta-label">{labels.durationLabel}</span>
+                              <span className="booking-route-meta-value">{durationValue}</span>
                             </div>
                             <div className="booking-route-meta-item">
-                              <span className="booking-route-meta-label">Khoảng cách:</span>
-                              <span className="booking-route-meta-value">{route.distance ?? "Đang cập nhật"}</span>
+                              <span className="booking-route-meta-label">{labels.distanceLabel}</span>
+                              <span className="booking-route-meta-value">{distanceValue}</span>
                             </div>
                           </div>
 
                           {option.times.length > 0 && (
                             <div className="booking-route-times">
-                              <span className="booking-route-times-label">Giờ xuất bến:</span>
+                              <span className="booking-route-times-label">{labels.departuresLabel}</span>
                               <div className="booking-route-time-list">
                                 {option.times.map((time) => (
                                   <span key={`${option.vehicleType}-${time}`} className="booking-route-time-chip">
@@ -617,98 +875,38 @@ export function BookingForm() {
                             </div>
                           )}
 
-                          {option.seatOptions?.length ? (
-                            isPremium ? (
-                              <div className="booking-route-seat-list">
-                                <span className="booking-route-seat-list-heading">Loại ghế</span>
-                                {option.seatOptions.map((seat) => (
+                          {premiumSuites}
+
+                          {seatOptions.length > 0 && !isPremium ? (
+                            <div className="booking-route-seats">
+                              <span className="booking-route-seats-heading">{labels.seatChipHeading}</span>
+                              {seatOptions.map((seat) => {
+                                const seatLabel = seatLabelCopy[seat.label]?.[language] ?? seat.label;
+                                return (
                                   <div
-                                    key={`${option.vehicleType}-${seat.label}-${seat.price}`}
-                                    className="booking-route-seat-list-row"
-                                  >
-                                    <span className="booking-route-seat-list-label">{seat.label}</span>
-                                    <span className="booking-route-seat-list-price">{seat.price}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="booking-route-seats">
-                                {option.seatOptions.map((seat) => (
-                                  <div
-                                    key={`${option.vehicleType}-${seat.label}-${seat.price}`}
+                                    key={`${option.vehicleType}-${seat.label}`}
                                     className="booking-route-seat-chip"
                                   >
-                                    <span className="booking-route-seat-chip-label">{seat.label}</span>
-                                    <span className="booking-route-seat-chip-price">{seat.price}</span>
+                                    <span className="booking-route-seat-chip-label">{seatLabel}</span>
+                                    <span className="booking-route-seat-chip-price">{seat.price[language]}</span>
                                   </div>
-                                ))}
-                              </div>
-                            )
+                                );
+                              })}
+                            </div>
                           ) : null}
 
-                          {option.notes && <p className="booking-route-note">{option.notes}</p>}
+                          {option.notes && <p className="booking-route-note">{option.notes[language]}</p>}
 
                           {route.shuttle && <div className="booking-route-shuttle">{route.shuttle}</div>}
 
                           <div className="booking-route-actions">
-                            {hasImages && (
-                              <Button
-                                type="button"
-                                size="lg"
-                                variant="outline"
-                                className="booking-route-secondary"
-                                onClick={() => toggleRouteImage(cardKey)}
-                              >
-                                <ImageIcon />
-                                {isExpanded ? "Ẩn hình ảnh" : "Xem hình ảnh"}
-                              </Button>
-                            )}
-                            <Button size="lg" className="booking-route-primary" asChild>
+                            <Button size="lg" className="booking-route-primary" asChild aria-label={labels.callToBook}>
                               <a href="tel:0983250900">
                                 <PhoneCall />
-                                Đặt vé ngay
+                                {labels.callToBook}
                               </a>
                             </Button>
                           </div>
-
-                          {isExpanded && hasImages && currentImage ? (
-                            <motion.div
-                              layout
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.3 }}
-                              className="booking-route-photo"
-                            >
-                              <div className="booking-route-photo-frame">
-                                <img
-                                  src={currentImage}
-                                  alt={`Hình ảnh ${option.vehicleType}`}
-                                  loading="lazy"
-                                  className="booking-route-photo-image"
-                                />
-                              </div>
-                              {imageSet.length > 1 ? (
-                                <>
-                                  <button
-                                    type="button"
-                                    className="booking-route-photo-arrow booking-route-photo-arrow--prev"
-                                    onClick={() => handlePrevImage(cardKey, imageSet.length)}
-                                    aria-label="Ảnh trước"
-                                  >
-                                    <ChevronLeft />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="booking-route-photo-arrow booking-route-photo-arrow--next"
-                                    onClick={() => handleNextImage(cardKey, imageSet.length)}
-                                    aria-label="Ảnh tiếp"
-                                  >
-                                    <ChevronRight />
-                                  </button>
-                                </>
-                              ) : null}
-                            </motion.div>
-                          ) : null}
                         </div>
                       </motion.div>
                     );
@@ -716,11 +914,11 @@ export function BookingForm() {
                 })
               ) : (
                 <div className="booking-route-empty">
-                  <p>Hiện chưa có lịch trình cho tuyến này. Vui lòng chọn tuyến khác hoặc liên hệ tổng đài.</p>
-                  <Button size="lg" className="booking-route-primary" asChild>
+                  <p>{labels.emptyMessage}</p>
+                  <Button size="lg" className="booking-route-primary" asChild aria-label={labels.callSupport}>
                     <a href="tel:0983250900">
                       <PhoneCall />
-                      Gọi tư vấn
+                      {labels.callSupport}
                     </a>
                   </Button>
                 </div>

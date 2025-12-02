@@ -30,6 +30,7 @@
   align-items: center;
   justify-content: space-between;
   height: 5rem;
+  gap: 1rem;
 }
 
 .navbar-brand {
@@ -38,6 +39,21 @@
   gap: 0.75rem;
   color: #ffffff;
   font-weight: 600;
+}
+.navbar-brand-button {
+  border: none;
+  background: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.navbar-brand-button:focus {
+  outline: none;
+}
+.navbar-brand-button:active {
+  transform: scale(0.98);
 }
 .logoTT{
   width: 60px;
@@ -68,10 +84,12 @@
   margin-right: -10px;
 }
 
+
 .navbar-links {
   display: none;
   align-items: center;
   gap: 2rem;
+  margin-left: auto;
 }
 
 @media (min-width: 768px) {
@@ -92,22 +110,62 @@
   color: #ffe4e6;
 }
 
-.navbar-hotline-button {
+.navbar-language-button {
   background-color: #ffffff;
   border-color: #ffffff;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   color: #ed1621;
+  padding-inline: 0.9rem;
 }
 
-.navbar-hotline-button:hover {
+.navbar-language-button:hover {
   background-color: #ffe4e6;
 }
 
-.navbar-hotline-button svg {
-  width: 1rem;
-  height: 1rem;
-  margin-right: 0.5rem;
+.navbar-language-button--desktop {
+  margin-left: 2.5rem;
+}
+
+.navbar-language-text {
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.navbar-language-flags {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.navbar-language-flag {
+  width: 1.25rem;
+  height: 0.85rem;
+  border-radius: 0.2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.navbar-language-mobile {
+  display: inline-flex;
+}
+
+@media (min-width: 768px) {
+  .navbar-language-mobile {
+    display: none;
+  }
+
+  .navbar-actions {
+    display: none;
+  }
 }
 
 .navbar-menu-button {

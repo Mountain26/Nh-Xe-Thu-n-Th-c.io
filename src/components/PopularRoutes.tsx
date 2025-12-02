@@ -2,6 +2,7 @@ import * as React from "react";
 import { ArrowDown, ArrowUp, BusFront } from "lucide-react";
 import { Button } from "./ui/button";
 import { AnimatePresence, motion } from "motion/react";
+import { useLanguage } from "../context/LanguageContext";
 
 import routeImageA from "./assets/xett.jpg";
 import routeImageB from "./assets/xett2.jpg";
@@ -12,76 +13,102 @@ import "./PopularRoutes.css";
 const routes = [
   {
     id: 1,
-    from: "Hà Giang",
-    to: "Móng Cái",
-    time: "9 giờ 30 phút",
+    from: { vi: "Hà Giang", en: "Ha Giang" },
+    to: { vi: "Móng Cái", en: "Mong Cai" },
+    time: { vi: "9 giờ 30 phút", en: "9h 30m" },
     price: "450.000 đ",
-    distance: "530 km",
+    distance: { vi: "530 km", en: "530 km" },
     image: routeImageA,
   },
   {
     id: 2,
-    from: "Hà Giang",
-    to: "Quảng Ninh",
-    time: "8 giờ",
+    from: { vi: "Hà Giang", en: "Ha Giang" },
+    to: { vi: "Quảng Ninh", en: "Quang Ninh" },
+    time: { vi: "8 giờ", en: "8h" },
     price: "350.000 đ",
-    distance: "470 km",
+    distance: { vi: "470 km", en: "470 km" },
     image: routeImageB,
   },
   {
     id: 3,
-    from: "Hà Giang",
-    to: "Bắc Ninh",
-    time: "5 giờ 30 phút",
+    from: { vi: "Hà Giang", en: "Ha Giang" },
+    to: { vi: "Bắc Ninh", en: "Bac Ninh" },
+    time: { vi: "5 giờ 30 phút", en: "5h 30m" },
     price: "250.000 đ",
-    distance: "320 km",
+    distance: { vi: "320 km", en: "320 km" },
     image: routeImageC,
   },
   {
     id: 4,
-    from: "Hà Giang",
-    to: "Bắc Giang",
-    time: "5 giờ 45 phút",
+    from: { vi: "Hà Giang", en: "Ha Giang" },
+    to: { vi: "Bắc Giang", en: "Bac Giang" },
+    time: { vi: "5 giờ 45 phút", en: "5h 45m" },
     price: "250.000 đ",
-    distance: "310 km",
+    distance: { vi: "310 km", en: "310 km" },
     image: routeImageC,
   },
   {
     id: 5,
-    from: "Hà Giang",
-    to: "Lạng Sơn",
-    time: "6 giờ 30 phút",
+    from: { vi: "Hà Giang", en: "Ha Giang" },
+    to: { vi: "Lạng Sơn", en: "Lang Son" },
+    time: { vi: "6 giờ 30 phút", en: "6h 30m" },
     price: "350.000 đ",
-    distance: "420 km",
+    distance: { vi: "420 km", en: "420 km" },
     image: routeImageA,
   },
   {
     id: 6,
-    from: "Hà Giang",
-    to: "Sao Đỏ",
-    time: "6 giờ",
+    from: { vi: "Hà Giang", en: "Ha Giang" },
+    to: { vi: "Sao Đỏ", en: "Sao Do" },
+    time: { vi: "6 giờ", en: "6h" },
     price: "300.000 đ",
-    distance: "380 km",
+    distance: { vi: "380 km", en: "380 km" },
     image: routeImageC,
   },
   {
     id: 7,
-    from: "Hà Giang",
-    to: "Thái Nguyên",
-    time: "4 giờ 30 phút",
+    from: { vi: "Hà Giang", en: "Ha Giang" },
+    to: { vi: "Thái Nguyên", en: "Thai Nguyen" },
+    time: { vi: "4 giờ 30 phút", en: "4h 30m" },
     price: "200.000 đ",
-    distance: "270 km",
+    distance: { vi: "270 km", en: "270 km" },
     image: routeImageB,
   },
 ];
 
+const copy = {
+  vi: {
+    heading: "Tuyến xe nổi bật",
+    description:
+      "Các tuyến xe Thuận Thực đang phục vụ cố định, giá vé niêm yết rõ ràng và lên đường mỗi ngày",
+    vehicleTag: "Limousine 24 phòng VIP",
+    timeLabel: "Thời gian:",
+    distanceLabel: "Khoảng cách:",
+    bookNow: "Đặt vé ngay",
+    viewAll: "Xem toàn bộ tuyến",
+    collapse: "Thu gọn",
+  },
+  en: {
+    heading: "Popular routes",
+    description: "Fixed Thuận Thực services with transparent fares and daily departures",
+    vehicleTag: "24-suite VIP limousine",
+    timeLabel: "Duration:",
+    distanceLabel: "Distance:",
+    bookNow: "Book now",
+    viewAll: "View all routes",
+    collapse: "Show less",
+  },
+} as const;
+
 export function PopularRoutes() {
+  const { language } = useLanguage();
+  const labels = copy[language];
   const [showAll, setShowAll] = React.useState(false);
   const visibleRoutes = showAll ? routes : routes.slice(0, 3);
   const hasMoreRoutes = routes.length > 3;
 
   return (
-    <section className="routes-section">
+    <section className="routes-section" id="tuyen-xe">
       <div className="routes-container">
         {/* Section header */}
         <motion.div
@@ -91,10 +118,8 @@ export function PopularRoutes() {
           transition={{ duration: 0.6 }}
           className="routes-header"
         >
-          <h2 className="routes-title">Tuyến xe nổi bật</h2>
-          <p className="routes-description">
-            Các tuyến xe Thuận Thực đang phục vụ cố định, giá vé niêm yết rõ ràng và lên đường mỗi ngày
-          </p>
+          <h2 className="routes-title">{labels.heading}</h2>
+          <p className="routes-description">{labels.description}</p>
         </motion.div>
 
         {/* Routes grid */}
@@ -113,7 +138,10 @@ export function PopularRoutes() {
               {/* Image placeholder */}
                 <div className="route-media">
                   <div className="route-media-placeholder">
-                    <img src={route.image} alt={route.to} />
+                    <img
+                      src={route.image}
+                      alt={`Xe Thuận Thực tuyến ${route.from[language]} - ${route.to[language]}`}
+                    />
                   </div>
                   <div className="route-media-overlay" />
 
@@ -124,21 +152,21 @@ export function PopularRoutes() {
               <div className="route-body">
                 <div className="route-meta">
                   <BusFront />
-                  <span>Limousine 24 phòng VIP</span>
+                  <span>{labels.vehicleTag}</span>
                 </div>
 
                 <div className="route-path">
                   <div className="route-points">
                     <div className="route-point">
                       <div className="route-point__dot" />
-                      <span>{route.from}</span>
+                      <span>{route.from[language]}</span>
                     </div>
                     <div className="route-connector">
                       <ArrowDown />
                     </div>
                     <div className="route-point">
                       <div className="route-point__dot route-point__dot--destination" />
-                      <span>{route.to}</span>
+                      <span>{route.to[language]}</span>
                     </div>
                   </div>
                   <div className="route-fare">
@@ -149,18 +177,16 @@ export function PopularRoutes() {
                 <div className="route-info">
                   <div className="route-info-row">
                     <span className="route-info-label">Thời gian:</span>
-                    <span>{route.time}</span>
+                    <span>{route.time[language]}</span>
                   </div>
                   <div className="route-info-row">
                     <span className="route-info-label">Khoảng cách:</span>
-                    <span>{route.distance}</span>
+                    <span>{route.distance[language]}</span>
                   </div>
                 </div>
 
                 <Button className="route-button" asChild>
-                  <a href="tel:0983250900">
-                    Đặt vé ngay
-                  </a>
+                  <a href="tel:0983250900">{labels.bookNow}</a>
                 </Button>
               </div>
               </motion.div>
@@ -184,7 +210,7 @@ export function PopularRoutes() {
               className="routes-toggle-button"
               onClick={() => setShowAll((prev) => !prev)}
             >
-              {showAll ? "Thu gọn" : "Xem toàn bộ tuyến"}
+              {showAll ? labels.collapse : labels.viewAll}
               {showAll ? <ArrowUp /> : <ArrowDown />}
             </Button>
           </motion.div>

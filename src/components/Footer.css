@@ -36,7 +36,7 @@
 
 @media (min-width: 1024px) {
   .footer-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: 1.4fr 1fr 1.1fr 1.3fr;
   }
 }
 
@@ -72,25 +72,67 @@
 
 .footer-socials {
   display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footer-socials-heading {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.footer-social-list {
+  display: flex;
   gap: 0.75rem;
 }
 
 .footer-social-button {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.85rem;
+  height: 2.85rem;
   border-radius: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.1);
-  border: none;
-  color: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background-color: transparent;
+  color: #e2e8f0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s ease;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
-.footer-social-button:hover {
-  background-color: #d62828;
+.footer-social-button svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.footer-social-zalo {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.footer-social-button:hover,
+.footer-social-button:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(148, 163, 184, 0.28);
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(226, 232, 240, 0.75);
   color: #ffffff;
+}
+
+.footer-social-button--facebook {
+  color: #60a5fa;
+}
+
+.footer-social-button--zalo {
+  color: #38bdf8;
+  font-size: 0.9rem;
+}
+
+.footer-social-button--mail {
+  color: #fb923c;
 }
 
 .footer-heading {
@@ -134,6 +176,16 @@
   flex-shrink: 0;
 }
 
+.footer-contact-link {
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-contact-link:hover {
+  color: #d62828;
+}
+
 .footer-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 2rem;
@@ -169,4 +221,28 @@
 
 .footer-bottom-links a:hover {
   color: #d62828;
+}
+
+.footer-facebook {
+  position: relative;
+  width: min(100%, 450px);
+  background-color: #ffffff;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
+  padding: 0.35rem;
+  overflow: hidden;
+}
+
+.footer-facebook > .fb-page {
+  width: 100% !important;
+}
+
+.footer-facebook > .fb-page span,
+.footer-facebook > .fb-page iframe {
+  width: 100% !important;
+}
+
+@media (max-width: 639px) {
+  .footer-facebook {
+    margin-inline: auto;
+  }
 }

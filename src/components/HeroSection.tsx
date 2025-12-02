@@ -1,6 +1,7 @@
 import { Phone, ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
 import { motion } from "motion/react";
+import { useLanguage } from "../context/LanguageContext";
 
 import heroMainImage from "./assets/xett.jpg";
 import heroBusImage from "./assets/NXTT.png";
@@ -8,6 +9,32 @@ import heroBusImage from "./assets/NXTT.png";
 import "./HeroSection.css";
 
 export function HeroSection() {
+  const { language } = useLanguage();
+
+  const copy = language === "vi"
+    ? {
+        title: "Dịch vụ xe giường nằm cao cấp",
+        subtitle: "Thuận Thực đồng hành cùng bạn trên mọi hành trình",
+        description:
+          "Gọi điện đặt vé trực tuyến trong vài giây, lên xe đúng giờ, trải nghiệm tiện nghi hiện đại và đội ngũ tài xế tận tâm. Chúng tôi cam kết mang đến chuyến đi an toàn, êm ái và đúng lịch trình.",
+        primaryCta: "Đặt vé ngay",
+        secondaryCta: "Xem lịch trình",
+        hotlineLabel: "Tổng đài 24/7",
+        heroAlt: "Khoang xe Thuận Thực sang trọng",
+        busAlt: "Hình ảnh xe Thuận Thực",
+      }
+    : {
+        title: "Premium sleeper coach service",
+        subtitle: "Thuận Thực accompanies you on every journey",
+        description:
+          "Book online in seconds, depart on time, and enjoy modern amenities with a caring driver team. We deliver safe, smooth trips that stay on schedule.",
+        primaryCta: "Book now",
+        secondaryCta: "View schedule",
+        hotlineLabel: "24/7 hotline",
+        heroAlt: "Thuận Thực luxury coach cabin",
+        busAlt: "Thuận Thực coach exterior",
+      };
+
   const scrollToBooking = () => {
     const el = document.getElementById("tim-chuyen");
     if (el) {
@@ -16,7 +43,7 @@ export function HeroSection() {
   };
 
   return (
-    <section className="hero-section">
+    <section className="hero-section" id="hero">
       {/* Decorative curved shapes */}
       <div className="hero-shape hero-shape--right">
         <div className="hero-bubble hero-bubble--right-primary" />
@@ -38,24 +65,18 @@ export function HeroSection() {
           >
             {/* Large heading */}
             <div className="hero-heading-group">
-              <h1 className="hero-heading-primary">
-                Dịch vụ xe giường nằm cao cấp
-              </h1>
-              <h2 className="hero-heading-secondary">
-                Thuận Thực đồng hành cùng bạn trên mọi hành trình
-              </h2>
+              <h1 className="hero-heading-primary">{copy.title}</h1>
+              <h2 className="hero-heading-secondary">{copy.subtitle}</h2>
             </div>
 
             {/* Subtitle */}
-            <p className="hero-description">
-              Đặt vé trực tuyến trong vài giây, lên xe đúng giờ, trải nghiệm tiện nghi hiện đại và đội ngũ tài xế tận tâm. Chúng tôi cam kết mang đến chuyến đi an toàn, êm ái và đúng lịch trình.
-            </p>
+            <p className="hero-description">{copy.description}</p>
 
             {/* CTA Buttons */}
             <div className="hero-cta">
               <Button size="lg" className="hero-cta-primary" asChild>
                 <a href="tel:0983250900">
-                  Đặt vé ngay
+                  {copy.primaryCta}
                   <ArrowRight />
                 </a>
               </Button>
@@ -66,7 +87,7 @@ export function HeroSection() {
                 type="button"
                 onClick={scrollToBooking}
               >
-                Xem lịch trình
+                {copy.secondaryCta}
               </Button>
             </div>
 
@@ -76,7 +97,7 @@ export function HeroSection() {
                 <Phone />
               </div>
               <div>
-                <div className="hero-hotline__label">Tổng đài 24/7</div>
+                <div className="hero-hotline__label">{copy.hotlineLabel}</div>
                 <div className="hero-hotline__value">0983.250.900</div>
               </div>
             </div>
@@ -92,7 +113,7 @@ export function HeroSection() {
             {/* Curved image frame for landscape */}
             <div className="hero-media-frame">
               <div className="hero-media-placeholder">
-                <img src={heroMainImage} alt="Khoang xe Thuận Thực sang trọng" />
+                <img src={heroMainImage} alt={copy.heroAlt} />
               </div>
               {/* Decorative overlay */}
               <div className="hero-media-overlay" />
@@ -123,7 +144,7 @@ export function HeroSection() {
           {/* Bus frame with perspective */}
           <div className="hero-bus-frame">
             <div className="hero-bus-placeholder">
-              <img src={heroBusImage} alt="Hình ảnh xe Thuận Thực" />
+              <img src={heroBusImage} alt={copy.busAlt} />
             </div>
             <div className="hero-bus-overlay" />
           </div>

@@ -1,11 +1,30 @@
 import { Phone, MessageCircle } from "lucide-react";
 import { motion } from "motion/react";
+import { useLanguage } from "../context/LanguageContext";
 
 import "./ContactButtons.css";
 
 export function ContactButtons() {
+  const { language } = useLanguage();
+
+  const labels = language === "vi"
+    ? {
+        title: "Liên hệ với chúng tôi",
+        subtitle: "Chọn kênh phù hợp để được hỗ trợ ngay",
+        callMain: "Gọi tổng đài",
+        callSecond: "Gọi Viettel",
+        zalo: "Liên hệ Zalo",
+      }
+    : {
+        title: "Contact us",
+        subtitle: "Pick a channel to get instant support",
+        callMain: "Call hotline",
+        callSecond: "Call Viettel",
+        zalo: "Message on Zalo",
+      };
+
   return (
-    <section className="contact-section">
+    <section className="contact-section" id="lien-he">
       <div className="contact-inner">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -14,8 +33,8 @@ export function ContactButtons() {
           transition={{ duration: 0.6 }}
           className="contact-heading"
         >
-          <h3 className="contact-title">Liên hệ với chúng tôi</h3>
-          <p className="contact-subtitle">Chọn kênh phù hợp để được hỗ trợ ngay</p>
+          <h3 className="contact-title">{labels.title}</h3>
+          <p className="contact-subtitle">{labels.subtitle}</p>
         </motion.div>
 
         <div className="contact-actions">
@@ -33,7 +52,7 @@ export function ContactButtons() {
             <div className="contact-button__icon">
               <Phone />
             </div>
-            <span>Gọi tổng đài</span>
+            <span>{labels.callMain}</span>
           </motion.a>
 
           {/* Gọi Viettel */}
@@ -50,7 +69,7 @@ export function ContactButtons() {
             <div className="contact-button__icon">
               <Phone />
             </div>
-            <span>Gọi Viettel</span>
+            <span>{labels.callSecond}</span>
           </motion.a>
 
           {/* Liên hệ Zalo */}
@@ -69,7 +88,7 @@ export function ContactButtons() {
             <div className="contact-button__icon">
               <MessageCircle />
             </div>
-            <span>Liên hệ Zalo</span>
+            <span>{labels.zalo}</span>
           </motion.a>
         </div>
       </div>
