@@ -2,15 +2,13 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'node:path'
 
-// Vite config cho project React + GitHub Pages
 export default defineConfig({
-  // Quan trọng: trùng TÊN REPO hiện tại trên GitHub: Mountain26/NhaXeThuanThuc
-  base: '/NhaXeThuanThuc/',
+  // Deploy trên Vercel → root domain
+  base: '/',
 
   plugins: [react()],
 
   resolve: {
-    // Cho phép import không cần .ts/.tsx/.js
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -57,8 +55,7 @@ export default defineConfig({
 
   build: {
     target: 'esnext',
-    // Build ra thư mục docs/ vì GitHub Pages đang đọc master + /docs
-    outDir: 'docs',
+    outDir: 'dist',   // Để trùng với "Output Directory" bên Vercel
   },
 
   server: {
